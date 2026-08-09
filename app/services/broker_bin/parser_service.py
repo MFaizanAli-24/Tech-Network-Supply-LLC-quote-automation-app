@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
 """
-extract_brokerbin.py
-
 Parses a BrokerBin "Match Your Hits" hourly report email and extracts,
 for every "Searched by" hit, the following fields:
 
@@ -28,24 +25,22 @@ INPUT FORMATS SUPPORTED (auto-detected):
   2. A list of such dicts (multiple fetched emails).
   3. A JSON string or Python-literal string of either of the above -- including
      text with a leading label, e.g. "Fetched Emails: {'contentType': ...}".
-  4. A raw HTML string (uses <br>, &nbsp;, <a href="mailto:...">, etc).
+  4. A raw HTML string (e.g. Outlook/Gmail-authored markup with <br style="...">,
+     <span>, &nbsp;, <a href="mailto:...">, etc).
   5. Plain text, already formatted like the row examples above.
 
-  Real-world HTML→text conversions also tend to swallow random spaces
-  (e.g. "Searchedby:", "GLC-FE-100EXSearched by:", "N/AP: 763-383-9920").
-  The parsing below is deliberately tolerant of these missing spaces.
+  Real-world HTML→text conversions also tend to swallow random spaces or run
+  tags together (e.g. "Searchedby:", "GLC-FE-100EXSearched by:",
+  "N/AP: 763-383-9920", "<brstyle=\"...\">" with no space before the attribute).
+  The parsing below is deliberately tolerant of these artifacts.
 
 Usage:
-    from extract_brokerbin import parse_brokerbin_report
+    from services.broker_bin.parser_service import parse_brokerbin_report
 
     fetched = {'contentType': 'html', 'content': '<html>...'}
     rows = parse_brokerbin_report(fetched)
     # rows is a list of lists:
     #   [Part#, BrandName, CompanyName, CompanyContactName, CompanyContactNumber]
-
-Run directly:
-    python extract_brokerbin.py input.txt   # reads file, prints the list of lists
-    cat input.txt | python extract_brokerbin.py   # reads from stdin
 """
 
 import ast
