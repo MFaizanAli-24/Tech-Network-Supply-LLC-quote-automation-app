@@ -186,6 +186,7 @@ def get_emails_from_sender(
         f"from/emailAddress/address eq '{sender_address}'",
         f"receivedDateTime ge {start_time.strftime(fmt)}",
         f"receivedDateTime le {end_time.strftime(fmt)}",
+        f"contains(subject, {os.environ.get('BROKER_BIN_REPORT_SUBJECT')})",
     ]
 
     params = {
