@@ -144,8 +144,9 @@ def html_to_text(markup: str) -> str:
 
     # Drop script/style blocks entirely
     text = re.sub(r'(?is)<(script|style)\b.*?</\1>', '', text)
-    # Line/paragraph boundaries -> newline
-    text = re.sub(r'(?i)<br\s*/?>', '\n', text)
+    # Line/paragraph boundaries -> newline. Tolerant of attributes on <br>
+    # (e.g. <br style="...">) and a missing space before them (e.g. <brstyle="...">).
+    text = re.sub(r'(?i)<br[^>]*>', '\n', text)
     text = re.sub(r'(?i)</(p|div|tr|li)>', '\n', text)
     # Strip all remaining tags but keep their inner text (e.g. link text)
     text = re.sub(r'<[^>]+>', '', text)
