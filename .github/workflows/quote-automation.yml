@@ -3,10 +3,10 @@ name: Quote Automation
 on:
   schedule:
     - cron: "0 * * * *" # every hour, UTC
-  workflow_dispatch: {}
+  workflow_dispatch: 
 
 jobs:
-  run:
+  quote-automation-run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
