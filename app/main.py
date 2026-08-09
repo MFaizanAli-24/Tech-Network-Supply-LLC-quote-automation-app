@@ -142,7 +142,7 @@ def main() -> None:
     reconciliation_report_recipient_email = get_reconciliation_report_recipient_email(configuration_records)
 
     emails = get_emails_from_sender(broker_bin_sender_email, minutes=BROKER_BIN_REPORT_MINS, top=1)
-    print("==================== BROKERBIN MATCH REPORT STATS ====================")
+    logger.info("==================== BROKERBIN MATCH REPORT STATS ====================")
     if not emails:
         logger.info("No BrokerBin emails found.")
         return
@@ -154,21 +154,21 @@ def main() -> None:
     logger.debug("Sample head records: %s", broker_bin_records[:HEAD_RECORD_CNT])
     logger.debug("Sample tail records: %s", broker_bin_records[-TAIL_RECORD_CNT:])
 
-    print("==================== MATCH LOGS ====================")
+    logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
     
 
-    print("==================== INDIVIDUAL QUOTE EMAILS ====================")
+    logger.info("==================== INDIVIDUAL QUOTE EMAILS ====================")
     for match in matches:
-        print("--"*30)
+        logger.info("--"*30)
         send_quote_email(match)
-        print("--"*30)
+        logger.info("--"*30)
 
-    print("==================== RECONCILIATION REPORT ====================")
-    print("--"*30)
+    logger.info("==================== RECONCILIATION REPORT ====================")
+    logger.info("--"*30)
     send_reconciliation_report(matches, reconciliation_report_recipient_email)
-    print("--"*30)
+    logger.info("--"*30)
 
 
 if __name__ == "__main__":

@@ -150,11 +150,11 @@ def match_broker_bin_records(
                         "email_sent_to": to_email,
                         "email_type": to_email_type,
                     })
-                    print("--"*30)
+                    logger.info("--"*30)
                     logger.info(
                         "Match found for part %s / %s / %s: sending quote to %s (%s)",
                         part_number, company_name, contact_name, to_email, to_email_type
                     )
-                    print("--"*30)
+                    logger.info("--"*30)
 
     return matches
