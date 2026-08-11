@@ -238,8 +238,8 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
                             part_number_sent, part_company_sent, part_contact_sent, part_email_sent
                         )
                         break
-                else:
-                    filtered_matches.append(match)
+                    else:
+                        filtered_matches.append(match)
     else:
         logger.info("No parts requests found in the last 24 hours; all matches are new")
         filtered_matches = matches
