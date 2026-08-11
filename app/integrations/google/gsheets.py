@@ -115,3 +115,38 @@ def get_sheet_values(sheet_id: str, range_name: str = "Sheet1") -> list[list[str
         raise RuntimeError(f"Failed to read Google Sheet with SheetId: '{sheet_id}' and Range '{range_name}': {exc}") from exc
 
     return result.get("values", [])
+
+
+def write_sheet_values(sheet_id: str, range_name: str, values: list[list[str]]) -> None:
+    """
+    Writes values to a range of a Google Sheet using the service account
+    credentials configured via GOOGLE_SERVICE_ACCOUNT_FILE.
+
+    Args:
+        sheet_id: The Google Sheet's spreadsheet ID (from its URL).
+        range_name: The A1 notation range (e.g. sheet/tab name) to write to.
+        values: A list of rows, each a list of cell values as strings.
+
+    Raises:
+        KeyError: If GOOGLE_SERVICE_ACCOUNT_FILE is not set in the environment.
+        FileNotFoundError: If the service account key file does not exist.
+        RuntimeError: If the Google Sheets API call fails (e.g. bad sheet_id,
+            sheet not shared with the service account, network error).
+    """
+    try:
+        service_account_file = os.path.join(APP_DIR, os.environ["GOOGLE_SERVICE_ACCOUNT_FILE"])
+    except KeyError as exc:
+        raise KeyError("GOOGLE_SERVICE_ACCOUNT_FILE is not set in the environment") from exc
+
+    if not os.path.isfile(service_account_file):
+        raise FileNotFoundError(f"Service account key file not found: {service_account_file}")
+
+    try:
+        creds = Credentials.from_service_account_file(service_account_file, scopes=SCOPES)
+        service = build("sheets", "v4", credentials=creds)
+        body = {"values": values}
+        service.spreadsheets().values().update(
+            spreadsheetId=sheet_id, range=range_name, valueInputOption="RAW", body=body
+        ).execute()
+    except HttpError as exc:
+        raise RuntimeError(f"Failed to write to Google Sheet with SheetId: '{sheet_id}' and Range '{range_name}': {exc}") from exc
