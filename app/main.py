@@ -192,7 +192,7 @@ def main() -> None:
 
     logger.info("==================== RECONCILIATION REPORT ====================")
     logger.info("--"*30)
-    send_reconciliation_report(matches_filtered, reconciliation_report_recipient_email)
+    send_reconciliation_report(matches_filtered, aggregated_matches_by_company, reconciliation_report_recipient_email)
     logger.info("--"*30)
 
     logger.info("==================== SAVE PART REQUESTS - SUPABASE ====================")
