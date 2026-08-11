@@ -14,6 +14,17 @@ REQUIRED_HEADERS = {
     "contact email": "contact_email",
 }
 
+def deduplicate_records(records: list[list[str]]) -> list[list[str]]:
+    """
+    Deduplicates a list of records (lists of strings) while preserving order.
+    Args:
+        records: A list of records, each a list of strings.
+    Returns:
+        A new list of records with duplicates removed, preserving the original order.
+    """
+    dedup_records = list(dict.fromkeys(tuple(record) for record in records))
+    return [list(record) for record in dedup_records]
+
 
 def get_intake_rows(sheet_id: str, range_name: str) -> tuple[list[str],list[list[str]]]:
     """
@@ -59,6 +70,14 @@ def get_non_duplicate_intake_parts_rows(
         for row in existing_parts_rows
     ]
 
+    dedup_existing_parts_rows_broken_bin_eq = deduplicate_records(existing_parts_rows_broken_bin_eq)
+
+    if len(existing_parts_rows_broken_bin_eq) != len(dedup_existing_parts_rows_broken_bin_eq):
+        logger.warning(
+            "Found %d duplicate parts rows in the intake sheet (after deduplication)",
+            len(existing_parts_rows_broken_bin_eq) - len(dedup_existing_parts_rows_broken_bin_eq),
+        )
+
     new_parts_rows = []
     for broker_bin_record in broker_bin_records:
         try:
@@ -66,7 +85,7 @@ def get_non_duplicate_intake_parts_rows(
         except ValueError:
             logger.warning("Skipping malformed BrokerBin record (expected 5 fields): %s", broker_bin_record)
             continue
-        if [part_number, brand_name] not in existing_parts_rows_broken_bin_eq:
+        if [part_number, brand_name] not in dedup_existing_parts_rows_broken_bin_eq:
             new_parts_rows.append([part_number, brand_name, ''])
 
     logger.info("Found %d new parts rows to add to the intake sheet", len(new_parts_rows))
@@ -93,6 +112,14 @@ def get_non_duplicate_intake_contacts_rows(
         for row in existing_contacts_rows
     ]
 
+    dedup_existing_contacts_rows_broken_bin_eq = deduplicate_records(existing_contacts_rows_broken_bin_eq)
+
+    if len(existing_contacts_rows_broken_bin_eq) != len(dedup_existing_contacts_rows_broken_bin_eq):
+        logger.warning(
+            "Found %d duplicate contacts rows in the intake sheet (after deduplication)",
+            len(existing_contacts_rows_broken_bin_eq) - len(dedup_existing_contacts_rows_broken_bin_eq),
+        )
+
     new_contacts_rows = []
     for broker_bin_record in broker_bin_records:
         try:
@@ -100,7 +127,7 @@ def get_non_duplicate_intake_contacts_rows(
         except ValueError:
             logger.warning("Skipping malformed BrokerBin record (expected 5 fields): %s", broker_bin_record)
             continue
-        if [company_name, contact_name] not in existing_contacts_rows_broken_bin_eq:
+        if [company_name, contact_name] not in dedup_existing_contacts_rows_broken_bin_eq:
             new_contacts_rows.append([company_name, contact_name, ''])
 
     logger.info("Found %d new contacts rows to add to the intake sheet", len(new_contacts_rows))
