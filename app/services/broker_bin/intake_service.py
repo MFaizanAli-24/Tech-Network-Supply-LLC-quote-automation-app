@@ -23,8 +23,7 @@ def deduplicate_records(records: list[list[str]]) -> list[list[str]]:
         A new list of records with duplicates removed, preserving the original order.
     """
     dedup_records = list(dict.fromkeys(tuple(record) for record in records))
-    dedup_records_list = [list(record) for record in dedup_records]
-    return dedup_records_list
+    return [list(record) for record in dedup_records]
 
 
 def get_intake_rows(sheet_id: str, range_name: str) -> tuple[list[str],list[list[str]]]:
@@ -90,7 +89,16 @@ def get_non_duplicate_intake_parts_rows(
             new_parts_rows.append([part_number, brand_name, ''])
 
     logger.info("Found %d new parts rows to add to the intake sheet", len(new_parts_rows))
-    return new_parts_rows
+
+    new_part_rows_dedup = deduplicate_records(new_parts_rows)
+    if len(new_parts_rows) != len(new_part_rows_dedup):
+        logger.warning(
+            "Found %d duplicate new parts rows to add to the intake sheet (after deduplication)",
+            len(new_parts_rows) - len(new_part_rows_dedup),
+        )
+    logger.info("After deduplication, %d new parts rows will be added to the intake sheet", len(new_part_rows_dedup))
+
+    return new_part_rows_dedup
 
 
 def get_non_duplicate_intake_contacts_rows(
@@ -132,6 +140,15 @@ def get_non_duplicate_intake_contacts_rows(
             new_contacts_rows.append([company_name, contact_name, ''])
 
     logger.info("Found %d new contacts rows to add to the intake sheet", len(new_contacts_rows))
+
+    new_contacts_rows_dedup = deduplicate_records(new_contacts_rows)
+    if len(new_contacts_rows) != len(new_contacts_rows_dedup):
+        logger.warning(
+            "Found %d duplicate new contacts rows to add to the intake sheet (after deduplication)",
+            len(new_contacts_rows) - len(new_contacts_rows_dedup),
+        )
+    logger.info("After deduplication, %d new contacts rows will be added to the intake sheet", len(new_contacts_rows_dedup))
+
     return new_contacts_rows
 
 
