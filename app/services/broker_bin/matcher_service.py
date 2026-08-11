@@ -220,6 +220,7 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
     if parts_requests_last_24_hours:
         logger.info("Fetched %d parts requests from the last 24 hours", len(parts_requests_last_24_hours))
         for match in matches:
+            match_found = False
             for part_request in parts_requests_last_24_hours:
                 part_number_sent = part_request.get("part_number")
                 part_brand_sent = part_request.get("brand_name")
@@ -237,8 +238,11 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
                             "Match for part %s / %s / %s already sent to %s in the last 24 hours; skipping",
                             part_number_sent, part_company_sent, part_contact_sent, part_email_sent
                         )
+                        match_found = True
                         break
-            filtered_matches.append(match)
+                    
+            if not match_found:        
+                filtered_matches.append(match)
     else:
         logger.info("No parts requests found in the last 24 hours; all matches are new")
         filtered_matches = matches
