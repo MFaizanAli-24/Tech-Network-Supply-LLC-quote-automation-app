@@ -14,8 +14,8 @@ REQUIRED_HEADERS = {
     "price": "price",
     "company": "company_name",
     "contact name": "contact_name",
-    "contact person email": "primary_contact",
-    "email": "secondary_contact",
+    "primary email": "primary_contact",
+    "secondary email": "secondary_contact",
 }
 
 
