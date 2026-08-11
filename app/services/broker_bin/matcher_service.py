@@ -158,3 +158,23 @@ def match_broker_bin_records(
                     logger.info("--"*30)
 
     return matches
+
+
+def aggregate_matches_by_email(matches: list[dict[str, str]]) -> dict[str, list[dict[str, str]]]:
+    """
+    Aggregates matches by the email address they will be sent to.
+
+    Args:
+        matches: List of match dicts as produced by `match_broker_bin_records`.
+
+    Returns:
+        A dict mapping each email address to a list of match dicts that will be
+        sent to that address.
+    """
+    aggregated = {}
+    for match in matches:
+        email = match["email_sent_to"]
+        if email not in aggregated:
+            aggregated[email] = []
+        aggregated[email].append(match)
+    return aggregated

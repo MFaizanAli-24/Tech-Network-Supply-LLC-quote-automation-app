@@ -10,7 +10,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from integrations.google.gsheets import get_sheet_values
 from integrations.outlook.mail import get_emails_from_sender, send_email
 from services.broker_bin.parser_service import parse_brokerbin_report
-from services.broker_bin.matcher_service import match_broker_bin_records
+from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email
 from templates.quote_email import get_reconciltion_report_template, get_quote_email_template
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -35,14 +35,14 @@ GOOGLE_CONFIG_SHEET_NAME = os.environ.get("GOOGLE_CONFIG_SHEET_NAME", "Sheet1")
 BROKER_BIN_REPORT_MINS = int(os.environ.get("BROKER_BIN_REPORT_MINS", "60"))
 
 
-def send_quote_email(match: dict[str, str]) -> None:
+def send_quote_email(matches: list[dict[str, str]]) -> None:
     """
-    Sends a single quote email for one matched BrokerBin hit.
+    Sends a single quote email for all matched BrokerBin hit belonging to the same contact. 
 
     Args:
-        match: A match dict as produced by `match_broker_bin_records`, with keys
-            part_number, brand_name, company_name, contact_name, contact_number,
-            part_price, email_sent_to, email_type.
+        matches: A list of match dicts as produced by `match_broker_bin_records` and aggregated by `aggregate_matches_by_email`,
+        with keys part_number, brand_name, company_name, contact_name, contact_number,
+        part_price, email_sent_to, email_type.
 
     Returns:
         None
@@ -50,14 +50,21 @@ def send_quote_email(match: dict[str, str]) -> None:
     Raises:
         requests.HTTPError: If the underlying Graph API call to send the email fails.
     """
-    subject = f"Quote for Part Number: {match['part_number']}"
+
+    part_numbers = [match["part_number"] for match in matches]
+    part_prices = [match["part_price"] for match in matches]
+    recipient_name = list(set([match["contact_name"] for match in matches]))[0]
+    recipient_email = list(set([match["email_sent_to"] for match in matches]))[0]
+    recipient_email_type = list(set([match["email_type"] for match in matches]))[0]
+
+    subject = f"Quote for Part Number: {', '.join(part_numbers)}"
     body = get_quote_email_template(
-        part_name=match["part_number"], part_price=match["part_price"], to=match["contact_name"]
+        part_names=part_numbers, part_prices=part_prices, to=recipient_name
     )
-    send_email(to_address=match["email_sent_to"], subject=subject, body=body, body_type="HTML")
+    send_email(to_address=recipient_email, subject=subject, body=body, body_type="HTML")
     logger.info(
-        "Sent quote email to %s contact %s for part %s (price %s)",
-        match["email_type"], match["email_sent_to"], match["part_number"], match["part_price"],
+        "Sent quote email to %s contact %s for part(s) %s (price(s) %s)",
+        recipient_email_type, recipient_email, ','.join(part_numbers), ','.join(part_prices),
     )
 
 
@@ -157,6 +164,7 @@ def main() -> None:
     logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
+    aggregated_matches = aggregate_matches_by_email(matches)
     
 
     logger.info("==================== INDIVIDUAL QUOTE EMAILS ====================")

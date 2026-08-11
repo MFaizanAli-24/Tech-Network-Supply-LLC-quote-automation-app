@@ -1,30 +1,42 @@
-def get_quote_email_template(part_name: str, part_price: str, to: str, from_company_name: str = "Black Merlin LLC") -> str:
+def get_quote_email_template(part_names: list[str], part_prices: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
     """
-    Builds the HTML body for a single-part quote email.
+    Builds the HTML body for part(s) quote email.
 
     Args:
-        part_name: The part number/name being quoted.
-        part_price: The quoted price, as displayed text.
+        part_names: A list of part names/numbers being quoted.
+        part_prices: A list of the quoted prices, as displayed text.
         to: Name of the contact the email is addressed to.
         from_company_name: Company name used in the closing signature.
 
     Returns:
         An HTML string suitable for use as an email body.
     """
+
+    rows = ""
+    for part_name, part_price in zip(part_names, part_prices):
+        if not part_name or not part_price:
+            raise ValueError(f"Part name and price must be non-empty: {part_name}, {part_price}")
+        try:
+            rows += f"""
+                <tr>
+                    <td>{part_name}</td>
+                    <td>{part_price}</td>
+                </tr>
+            """
+        except Exception as exc:
+            raise ValueError(f"Failed to format part name and price into HTML: {part_name}, {part_price}") from exc
+        
     return f"""
     <html>
         <body>
             <p>Dear {to},</p>
-            <p>We are pleased to provide you with a quote for the part you requested:</p>
+            <p>We are pleased to provide you with a quote for the part(s) you requested:</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
                     <th>Part Name</th>
                     <th>Price</th>
                 </tr>
-                <tr>
-                    <td>{part_name}</td>
-                    <td>{part_price}</td>
-                </tr>
+                {rows}
             </table>
             <p>If you have any questions or would like to proceed with the order, please feel free to contact us.</p>
             <p>Best regards,<br>{from_company_name}</p>
