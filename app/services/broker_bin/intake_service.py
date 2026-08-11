@@ -23,7 +23,8 @@ def deduplicate_records(records: list[list[str]]) -> list[list[str]]:
         A new list of records with duplicates removed, preserving the original order.
     """
     dedup_records = list(dict.fromkeys(tuple(record) for record in records))
-    return [list(record) for record in dedup_records]
+    dedup_records_list = [list(record) for record in dedup_records]
+    return dedup_records_list
 
 
 def get_intake_rows(sheet_id: str, range_name: str) -> tuple[list[str],list[list[str]]]:
