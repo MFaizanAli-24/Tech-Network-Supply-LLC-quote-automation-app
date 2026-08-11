@@ -72,7 +72,9 @@ APP_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file
 
 # Read-only scope. Use "https://www.googleapis.com/auth/spreadsheets"
 # instead if the sheet is shared as Editor and you need to write data too.
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly",
+          # write access scope, if you need to write to the sheet:
+          "https://www.googleapis.com/auth/spreadsheets"]
 
 
 def get_sheet_values(sheet_id: str, range_name: str = "Sheet1") -> list[list[str]]:

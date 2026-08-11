@@ -19,7 +19,7 @@ REQUIRED_HEADERS = {
 }
 
 
-def get_header_indices(headers: list[str]) -> dict[str, int]:
+def get_header_indices(headers: list[str],required_headers=REQUIRED_HEADERS) -> dict[str, int]:
     """
     Maps REQUIRED_HEADERS field names to their column index in `headers`.
 
@@ -35,9 +35,9 @@ def get_header_indices(headers: list[str]) -> dict[str, int]:
     lowered = [h.lower() for h in headers]
     indices = {}
     for field in lowered:
-        if field not in REQUIRED_HEADERS:
+        if field not in required_headers:
             raise ValueError(f"Google Sheet has unexpected column: '{field}'")
-        field_mapping = REQUIRED_HEADERS[field]
+        field_mapping = required_headers[field]
         indices[field_mapping] = lowered.index(field)
     return indices
 
@@ -178,6 +178,25 @@ def aggregate_matches_by_email(matches: list[dict[str, str]]) -> dict[str, list[
         if email not in aggregated:
             aggregated[email] = []
         aggregated[email].append(match)
+    return aggregated
+
+
+def aggregate_matches_by_company(matches: list[dict[str, str]]) -> dict[str, list[dict[str, str]]]:
+    """
+    Aggregates matches by the company name they belong to.
+
+    Args:
+        matches: List of match dicts as produced by `match_broker_bin_records`.
+
+    Returns:
+        A dict mapping each company name to a list of match dicts that belong to that company.
+    """
+    aggregated = {}
+    for match in matches:
+        company_name = match["company_name"]
+        if company_name not in aggregated:
+            aggregated[company_name] = []
+        aggregated[company_name].append(match)
     return aggregated
 
 

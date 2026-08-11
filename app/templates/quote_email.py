@@ -45,7 +45,7 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], to: 
     """
 
 
-def get_reconciltion_report_template(records: list[dict[str, str]], from_company_name: str = "Black Merlin LLC") -> str:
+def get_reconciltion_report_template(records: list[dict[str, str]], company_records: dict[str, list[dict[str, str]]], from_company_name: str = "Black Merlin LLC") -> str:
     """
     Builds the HTML body for the reconciliation report email summarizing all
     quote emails sent during a run.
@@ -78,12 +78,30 @@ def get_reconciltion_report_template(records: list[dict[str, str]], from_company
         """
         except KeyError as exc:
             raise KeyError(f"Reconciliation record missing required field {exc}: {record}") from exc
+    company_rows = ""
+
+    for company_name, company_records_list in company_records.items():
+        company_rows += f"""
+                <tr style="background-color: #ccffcc;">
+                    <td>{company_name}</td>
+                    <td>{len(company_records_list)}</td>
+                </tr>
+                """
 
     return f"""
     <html>
         <body>
             <p>Dear Team,</p>
             <p>Please find below the reconciliation report:</p>
+            <p>Summary of Quotes Sent by Company:</p>
+            <table border="1" cellpadding="5" cellspacing="0">
+                <tr>
+                    <th>Company Name</th>
+                    <th>Number of Quotes Sent</th>
+                </tr>
+                {company_rows}
+            </table>
+            <p>Detailed Quote Records:</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
                     <th>Part Number</th>

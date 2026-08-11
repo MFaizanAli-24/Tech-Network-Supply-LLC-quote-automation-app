@@ -10,7 +10,8 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from integrations.google.gsheets import get_sheet_values
 from integrations.outlook.mail import get_emails_from_sender, send_email
 from services.broker_bin.parser_service import parse_brokerbin_report
-from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_24_hours
+from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_24_hours, aggregate_matches_by_company
+from services.broker_bin.intake_service import update_intake_parts_sheet, update_intake_contacts_sheet
 from templates.quote_email import get_reconciltion_report_template, get_quote_email_template
 from repository.parts_repository import save_part_request
 
@@ -32,6 +33,12 @@ GOOGLE_CONTACTS_SHEET_NAME = os.environ.get("GOOGLE_CONTACTS_SHEET_NAME", "Sheet
 
 GOOGLE_CONFIG_SHEET_ID = os.environ.get("GOOGLE_CONFIG_SHEET_ID", "")
 GOOGLE_CONFIG_SHEET_NAME = os.environ.get("GOOGLE_CONFIG_SHEET_NAME", "Sheet1")
+
+INTAKE_PARTS_SHEET_ID = os.environ.get("GOOGLE_INTAKE_PARTS_SHEET_ID")
+INTAKE_PARTS_SHEET_NAME = os.environ.get("GOOGLE_INTAKE_PARTS_SHEET_NAME")
+
+INTAKE_CONTACTS_SHEET_ID = os.environ.get("GOOGLE_INTAKE_CONTACTS_SHEET_ID")
+INTAKE_CONTACTS_SHEET_NAME = os.environ.get("GOOGLE_INTAKE_CONTACTS_SHEET_NAME")
 
 BROKER_BIN_REPORT_MINS = int(os.environ.get("BROKER_BIN_REPORT_MINS", "60"))
 
@@ -69,7 +76,7 @@ def send_quote_email(matches: list[dict[str, str]]) -> None:
     )
 
 
-def send_reconciliation_report(matches: list[dict[str, str]], recipient_email: str) -> None:
+def send_reconciliation_report(matches: list[dict[str, str]], matches_agg_by_company: dict[str, list[dict[str, str]]],  recipient_email: str) -> None:
     """
     Sends a summary report of every quote email sent during this run.
 
@@ -84,7 +91,7 @@ def send_reconciliation_report(matches: list[dict[str, str]], recipient_email: s
         requests.HTTPError: If the underlying Graph API call to send the email fails.
     """
     subject = f"Reconciliation Report: {len(matches)} Quotes Sent"
-    body = get_reconciltion_report_template(matches)
+    body = get_reconciltion_report_template(matches,matches_agg_by_company)
     send_email(
         to_address=recipient_email, subject=subject, body=body, body_type="HTML"
     )
@@ -162,15 +169,23 @@ def main() -> None:
     logger.debug("Sample head records: %s", broker_bin_records[:HEAD_RECORD_CNT])
     logger.debug("Sample tail records: %s", broker_bin_records[-TAIL_RECORD_CNT:])
 
+    logger.info("==================== UPDATE INTAKE SHEETS ====================")
+
+    logger.info("--"*30)
+    update_intake_parts_sheet(INTAKE_PARTS_SHEET_ID, INTAKE_PARTS_SHEET_NAME, broker_bin_records)
+    update_intake_contacts_sheet(INTAKE_CONTACTS_SHEET_ID, INTAKE_CONTACTS_SHEET_NAME, broker_bin_records)
+    logger.info("--"*30)
+
     logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
     matches_filtered = filter_matches_already_sent_last_24_hours(matches) 
-    aggregated_matches = aggregate_matches_by_email(matches_filtered)
+    aggregated_matches_by_email = aggregate_matches_by_email(matches_filtered)
+    aggregated_matches_by_company = aggregate_matches_by_company(matches_filtered)
     
 
     logger.info("==================== INDIVIDUAL QUOTE EMAILS ====================")
-    for _,match in aggregated_matches.items():
+    for _,match in aggregated_matches_by_email.items():
         logger.info("--"*30)
         send_quote_email(match)
         logger.info("--"*30)
