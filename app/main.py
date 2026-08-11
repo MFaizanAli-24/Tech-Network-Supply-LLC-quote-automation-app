@@ -10,7 +10,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from integrations.google.gsheets import get_sheet_values
 from integrations.outlook.mail import get_emails_from_sender, send_email
 from services.broker_bin.parser_service import parse_brokerbin_report
-from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email
+from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_24_hours
 from templates.quote_email import get_reconciltion_report_template, get_quote_email_template
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -164,7 +164,8 @@ def main() -> None:
     logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
-    aggregated_matches = aggregate_matches_by_email(matches)
+    matches_filtered = filter_matches_already_sent_last_24_hours(matches) 
+    aggregated_matches = aggregate_matches_by_email(matches_filtered)
     
 
     logger.info("==================== INDIVIDUAL QUOTE EMAILS ====================")
@@ -175,7 +176,7 @@ def main() -> None:
 
     logger.info("==================== RECONCILIATION REPORT ====================")
     logger.info("--"*30)
-    send_reconciliation_report(matches, reconciliation_report_recipient_email)
+    send_reconciliation_report(matches_filtered, reconciliation_report_recipient_email)
     logger.info("--"*30)
 
 

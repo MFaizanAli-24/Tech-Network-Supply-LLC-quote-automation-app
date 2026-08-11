@@ -4,6 +4,7 @@ resolving which contact email (primary or secondary) each quote should go to.
 """
 
 import logging
+from app.repository.parts_repository import get_last_24_hours_parts_requests
 
 logger = logging.getLogger(__name__)
 
@@ -178,3 +179,54 @@ def aggregate_matches_by_email(matches: list[dict[str, str]]) -> dict[str, list[
             aggregated[email] = []
         aggregated[email].append(match)
     return aggregated
+
+
+def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> list[dict[str, str]]:
+    """
+    Filters out matches that have already been sent in the last 24 hours.
+
+    Args:
+        matches: List of match dicts as produced by `match_broker_bin_records`.
+    Returns:
+        A filtered list of match dicts that have not been sent in the last 24 hours
+    """
+
+    try:
+        parts_requests_last_24_hours = get_last_24_hours_parts_requests()
+    except RuntimeError as exc:
+        logger.error("Failed to fetch last 24 hours parts requests: %s", exc)
+        return matches  # If we can't fetch the last 24 hours, assume all matches are new
+
+    filtered_matches = []
+    if parts_requests_last_24_hours:
+        logger.info("Fetched %d parts requests from the last 24 hours", len(parts_requests_last_24_hours))
+        for part_request in parts_requests_last_24_hours:
+            part_number_sent = part_request.get("part_number")
+            part_brand_sent = part_request.get("brand_name")
+            part_company_sent = part_request.get("company_name")
+            part_contact_sent = part_request.get("contact_name")
+            part_email_sent = part_request.get("email_sent_to")
+
+            if part_number_sent and part_brand_sent and part_company_sent and part_contact_sent and part_email_sent:
+                for match in matches:
+                    if (match["part_number"] == part_number_sent and
+                        match["brand_name"] == part_brand_sent and
+                        match["company_name"] == part_company_sent and
+                        match["contact_name"] == part_contact_sent and
+                        match["email_sent_to"] == part_email_sent):
+                        logger.info(
+                            "Match for part %s / %s / %s already sent to %s in the last 24 hours; skipping",
+                            part_number_sent, part_company_sent, part_contact_sent, part_email_sent
+                        )
+                        break
+                else:
+                    filtered_matches.append(match)
+    else:
+        logger.info("No parts requests found in the last 24 hours; all matches are new")
+        filtered_matches = matches
+        
+    logger.info(
+        "Filtered out %d matches already sent in the last 24 hours; %d remaining",
+        len(matches) - len(filtered_matches), len(filtered_matches)
+    )
+    return filtered_matches

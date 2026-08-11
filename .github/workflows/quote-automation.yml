@@ -40,4 +40,6 @@ jobs:
           GOOGLE_CONFIG_SHEET_NAME: ${{ secrets.GOOGLE_CONFIG_SHEET_NAME }}
           BROKER_BIN_REPORT_MINS: ${{ secrets.BROKER_BIN_REPORT_MINS }}
           BROKER_BIN_REPORT_SUBJECT: ${{ secrets.BROKER_BIN_REPORT_SUBJECT }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
 
