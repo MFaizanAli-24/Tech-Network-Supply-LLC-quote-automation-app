@@ -149,7 +149,7 @@ def get_non_duplicate_intake_contacts_rows(
         )
     logger.info("After deduplication, %d new contacts rows will be added to the intake sheet", len(new_contacts_rows_dedup))
 
-    return new_contacts_rows
+    return new_contacts_rows_dedup
 
 
 def update_intake_parts_sheet(sheet_id: str, range_name: str, broker_bin_records: list[list[str]]) -> None:

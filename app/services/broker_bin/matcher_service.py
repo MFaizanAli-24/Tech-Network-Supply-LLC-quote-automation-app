@@ -219,15 +219,15 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
     filtered_matches = []
     if parts_requests_last_24_hours:
         logger.info("Fetched %d parts requests from the last 24 hours", len(parts_requests_last_24_hours))
-        for part_request in parts_requests_last_24_hours:
-            part_number_sent = part_request.get("part_number")
-            part_brand_sent = part_request.get("brand_name")
-            part_company_sent = part_request.get("company_name")
-            part_contact_sent = part_request.get("contact_name")
-            part_email_sent = part_request.get("email_sent_to")
+        for match in matches:
+            for part_request in parts_requests_last_24_hours:
+                part_number_sent = part_request.get("part_number")
+                part_brand_sent = part_request.get("brand_name")
+                part_company_sent = part_request.get("company_name")
+                part_contact_sent = part_request.get("contact_name")
+                part_email_sent = part_request.get("email_sent_to")
 
-            if part_number_sent and part_brand_sent and part_company_sent and part_contact_sent and part_email_sent:
-                for match in matches:
+                if part_number_sent and part_brand_sent and part_company_sent and part_contact_sent and part_email_sent:
                     if (match["part_number"] == part_number_sent and
                         match["brand_name"] == part_brand_sent and
                         match["company_name"] == part_company_sent and
@@ -238,8 +238,7 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
                             part_number_sent, part_company_sent, part_contact_sent, part_email_sent
                         )
                         break
-                    else:
-                        filtered_matches.append(match)
+            filtered_matches.append(match)
     else:
         logger.info("No parts requests found in the last 24 hours; all matches are new")
         filtered_matches = matches
