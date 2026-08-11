@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 
 from postgrest.exceptions import APIError
 
-from app.repository.supabase_client import supabase_client
+from repository.supabase_client import supabase_client
 
 logger = logging.getLogger(__name__)
 
