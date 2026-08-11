@@ -4,7 +4,7 @@ resolving which contact email (primary or secondary) each quote should go to.
 """
 
 import logging
-from app.repository.parts_repository import get_last_24_hours_parts_requests
+from repository.parts_repository import get_last_24_hours_parts_requests
 
 logger = logging.getLogger(__name__)
 
