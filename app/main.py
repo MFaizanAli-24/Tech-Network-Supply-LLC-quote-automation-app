@@ -12,6 +12,7 @@ from integrations.outlook.mail import get_emails_from_sender, send_email
 from services.broker_bin.parser_service import parse_brokerbin_report
 from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_24_hours
 from templates.quote_email import get_reconciltion_report_template, get_quote_email_template
+from repository.parts_repository import save_part_request
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
@@ -177,6 +178,21 @@ def main() -> None:
     logger.info("==================== RECONCILIATION REPORT ====================")
     logger.info("--"*30)
     send_reconciliation_report(matches_filtered, reconciliation_report_recipient_email)
+    logger.info("--"*30)
+
+    logger.info("==================== SAVE PART REQUESTS - SUPABASE ====================")
+    logger.info("--"*30)
+    for match in matches_filtered:
+        save_part_request(
+            part_number=match["part_number"],
+            brand_name=match["brand_name"],
+            company_name=match["company_name"],
+            contact_name=match["contact_name"],
+            contact_number=match["contact_number"],
+            part_price=match["part_price"],
+            to_email=match["email_sent_to"],
+            to_email_type=match["email_type"],
+        )
     logger.info("--"*30)
 
 
