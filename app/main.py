@@ -168,7 +168,7 @@ def main() -> None:
     
 
     logger.info("==================== INDIVIDUAL QUOTE EMAILS ====================")
-    for match in aggregated_matches:
+    for _,match in aggregated_matches.items():
         logger.info("--"*30)
         send_quote_email(match)
         logger.info("--"*30)
