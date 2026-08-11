@@ -82,7 +82,7 @@ def send_reconciliation_report(matches: list[dict[str, str]], recipient_email: s
     Raises:
         requests.HTTPError: If the underlying Graph API call to send the email fails.
     """
-    subject = f"Reconciliation Report: {len(matches)} emails sent"
+    subject = f"Reconciliation Report: {len(matches)} Quotes Sent"
     body = get_reconciltion_report_template(matches)
     send_email(
         to_address=recipient_email, subject=subject, body=body, body_type="HTML"
