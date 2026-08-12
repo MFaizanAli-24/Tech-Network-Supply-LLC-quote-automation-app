@@ -1,4 +1,4 @@
-# Black Marlin Quote Automation Pipeline
+# Tech Network Supply LLC Quote Automation Pipeline
 
 An automation pipeline that watches for BrokerBin "Match Your Hits" report emails, matches each
 part-search hit against a Google Sheet of parts/contacts, and automatically sends a quote email to
