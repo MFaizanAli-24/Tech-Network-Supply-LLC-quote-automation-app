@@ -1,10 +1,11 @@
-def get_quote_email_template(part_names: list[str], part_prices: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
+def get_quote_email_template(part_names: list[str], part_prices: list[str], part_conditions: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
     """
     Builds the HTML body for part(s) quote email.
 
     Args:
         part_names: A list of part names/numbers being quoted.
         part_prices: A list of the quoted prices, as displayed text.
+        part_conditions: A list of the quoted part conditions, as displayed text.
         to: Name of the contact the email is addressed to.
         from_company_name: Company name used in the closing signature.
 
@@ -13,14 +14,16 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], to: 
     """
 
     rows = ""
-    for part_name, part_price in zip(part_names, part_prices):
+    for part_name, part_price, part_condition in zip(part_names, part_prices, part_conditions):
         if not part_name or not part_price:
             raise ValueError(f"Part name and price must be non-empty: {part_name}, {part_price}")
         try:
+            part_price = f"${part_price} each"
             rows += f"""
                 <tr>
                     <td>{part_name}</td>
                     <td>{part_price}</td>
+                    td>{part_condition}</td>
                 </tr>
             """
         except Exception as exc:
@@ -29,16 +32,17 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], to: 
     return f"""
     <html>
         <body>
-            <p>Dear {to},</p>
-            <p>We are pleased to provide you with a quote for the part(s) you requested:</p>
+            <p>Hi {to},</p>
+            <p>We currently have competitive pricing on the following part(s)</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
                     <th>Part Name</th>
                     <th>Price</th>
+                    <th>Condition</th>
                 </tr>
                 {rows}
             </table>
-            <p>If you have any questions or would like to proceed with the order, please feel free to contact us.</p>
+            <p>If you are interested in any of these items or have additional requirements, simply reply with your part numbers, and we will be happy to provide our best pricing</p>
             <p>Best regards,<br>{from_company_name}</p>
         </body>
     </html>

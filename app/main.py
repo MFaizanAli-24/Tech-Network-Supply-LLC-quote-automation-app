@@ -50,7 +50,7 @@ def send_quote_email(matches: list[dict[str, str]]) -> None:
     Args:
         matches: A list of match dicts as produced by `match_broker_bin_records` and aggregated by `aggregate_matches_by_email`,
         with keys part_number, brand_name, company_name, contact_name, contact_number,
-        part_price, email_sent_to, email_type.
+        part_price, part_condition, email_sent_to, email_type.
 
     Returns:
         None
@@ -61,6 +61,7 @@ def send_quote_email(matches: list[dict[str, str]]) -> None:
 
     part_numbers = [match["part_number"] for match in matches]
     part_prices = [match["part_price"] for match in matches]
+    part_conditions = [match["part_condition"] for match in matches]
     recipient_name = list(set([match["contact_name"] for match in matches]))[0]
     recipient_email = list(set([match["email_sent_to"] for match in matches]))[0]
     recipient_email_type = list(set([match["email_type"] for match in matches]))[0]

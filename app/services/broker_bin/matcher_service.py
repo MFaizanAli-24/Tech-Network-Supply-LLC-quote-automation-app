@@ -16,6 +16,7 @@ REQUIRED_HEADERS = {
     "contact name": "contact_name",
     "primary email": "primary_contact",
     "secondary email": "secondary_contact",
+    "condition": "condition"
 }
 
 
@@ -42,14 +43,14 @@ def get_header_indices(headers: list[str],required_headers=REQUIRED_HEADERS) -> 
     return indices
 
 
-def get_all_parts_prices(parts_data: list[list[str]]) -> dict[str, str]:
+def get_all_parts_prices_conditions(parts_data: list[list[str]]) -> dict[str, list[str]]:
     """
-    Builds a mapping of part_number -> price from the parts/contact Google Sheet.
+    Builds a mapping of part_number -> [price,condition] from the parts Google Sheet.
 
     Args:
         parts_data: Raw rows from the parts/contact Google Sheet, header row first.
     Returns:
-        A dict mapping part_number to price, for every row that has a non-empty part_number and price.
+        A dict mapping part_number to [price,condition], for every row that has a non-empty part_number and price.
     """
     if not parts_data:
         raise ValueError("parts_data is empty; expected a header row plus data rows")
@@ -58,13 +59,15 @@ def get_all_parts_prices(parts_data: list[list[str]]) -> dict[str, str]:
     indices = get_header_indices(headers)
     part_number_idx = indices["part_number"]
     price_idx = indices["price"]
+    condition_idx = indices["condition"]
 
     records = {}
     for row in parts_data[1:]:
         part_number = row[part_number_idx].strip()
         price = row[price_idx].strip()
         if part_number and price:
-            records[part_number] = price
+            part_condition = row[condition_idx].strip() if condition_idx < len(row) else ""
+            records[part_number] = [price, part_condition]
     return records
 
 
@@ -118,14 +121,14 @@ def match_broker_bin_records(
         A list of dicts, one per hit that matched a non-empty price and a usable
         contact email:
             {part_number, brand_name, company_name, contact_name, contact_number,
-             part_price, email_sent_to, email_type}
+             part_price, part_condition, email_sent_to, email_type}
 
     Raises:
         ValueError: If `parts_records` or `contacts_records` is empty or missing a
             required column.
     """
 
-    parts_info = get_all_parts_prices(parts_records)
+    parts_info = get_all_parts_prices_conditions(parts_records)
     contacts_info = get_all_company_emails(contacts_records)
 
     matches = []
@@ -137,7 +140,7 @@ def match_broker_bin_records(
             continue
 
         if part_number in parts_info:
-            part_price = parts_info[part_number]
+            [part_price, part_condition] = parts_info[part_number]
             if part_price != "":
                 if company_name in contacts_info:
                     to_email, to_email_type = contacts_info[company_name]
@@ -148,6 +151,7 @@ def match_broker_bin_records(
                         "contact_name": contact_name,
                         "contact_number": contact_number,
                         "part_price": part_price,
+                        "part_condition": part_condition,
                         "email_sent_to": to_email,
                         "email_type": to_email_type,
                     })
