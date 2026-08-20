@@ -62,7 +62,7 @@ def get_non_duplicate_intake_parts_rows(
         broker_bin_records: Raw rows from the BrokerBin report, each a list of strings representing
             the part number, brand name, company name, contact name, and contact number.
     Returns:
-        A list of new [part_number, brand_name, ''] rows to add to the intake parts sheet.
+        A list of new [part_number, brand_name, '', '', ''] rows to add to the intake parts sheet.
     """
     indices_parts = get_header_indices(headers_parts, required_headers=REQUIRED_HEADERS)
     existing_parts_rows_broken_bin_eq = [
@@ -86,7 +86,7 @@ def get_non_duplicate_intake_parts_rows(
             logger.warning("Skipping malformed BrokerBin record (expected 5 fields): %s", broker_bin_record)
             continue
         if [part_number, brand_name] not in dedup_existing_parts_rows_broken_bin_eq:
-            new_parts_rows.append([part_number, brand_name, ''])
+            new_parts_rows.append([part_number, brand_name, '', '', ''])
 
     logger.info("Found %d new parts rows to add to the intake sheet", len(new_parts_rows))
 

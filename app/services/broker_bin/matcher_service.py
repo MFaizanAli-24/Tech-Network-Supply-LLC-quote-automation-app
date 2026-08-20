@@ -16,7 +16,8 @@ REQUIRED_HEADERS = {
     "contact name": "contact_name",
     "primary email": "primary_contact",
     "secondary email": "secondary_contact",
-    "condition": "condition"
+    "condition": "condition",
+    "bb listing": "bb_listing",
 }
 
 
