@@ -68,12 +68,12 @@ def send_quote_email(matches: list[dict[str, str]]) -> None:
 
     subject = f"Quote for Part Number: {', '.join(part_numbers)}"
     body = get_quote_email_template(
-        part_names=part_numbers, part_prices=part_prices, to=recipient_name
+        part_names=part_numbers, part_prices=part_prices, part_conditions=part_conditions, to=recipient_name
     )
     send_email(to_address=recipient_email, subject=subject, body=body, body_type="HTML")
     logger.info(
-        "Sent quote email to %s contact %s for part(s) %s (price(s) %s)",
-        recipient_email_type, recipient_email, ','.join(part_numbers), ','.join(part_prices),
+        "Sent quote email to %s contact %s for part(s) %s (price(s) %s, condition(s) %s)",
+        recipient_email_type, recipient_email, ','.join(part_numbers), ','.join(part_prices), ','.join(part_conditions)
     )
 
 

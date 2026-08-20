@@ -55,7 +55,7 @@ def get_reconciltion_report_template(records: list[dict[str, str]], company_reco
     quote emails sent during a run.
 
     Args:
-        records: Match dicts, each expected to contain part_number, brand_name,
+        records: Match dicts, each expected to contain part_number, part_price, part_condition, brand_name,
             company_name, contact_name, and contact_number.
         from_company_name: Company name used in the closing signature.
 
@@ -72,6 +72,7 @@ def get_reconciltion_report_template(records: list[dict[str, str]], company_reco
         <tr style="background-color: #ccffcc;">
             <td>{record['part_number']}</td>
             <td>{record['part_price']}</td>
+            <td>{record['part_condition']}</td>
             <td>{record['brand_name']}</td>
             <td>{record['company_name']}</td>
             <td>{record['contact_name']}</td>
@@ -110,6 +111,7 @@ def get_reconciltion_report_template(records: list[dict[str, str]], company_reco
                 <tr>
                     <th>Part Number</th>
                     <th>Price</th>
+                    <th>Condition</th>
                     <th>Brand Name</th>
                     <th>Company Name</th>
                     <th>Contact Name</th>
