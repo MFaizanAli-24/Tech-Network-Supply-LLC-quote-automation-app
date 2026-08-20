@@ -12,8 +12,8 @@ REQUIRED_HEADERS = {
     "company": "company_name",
     "contact": "contact_name",
     "contact email": "contact_email",
-    "condition" : "condition"
-    "bb listing" : "bb_listing"
+    "condition" : "condition",
+    "bb listing" : "bb_listing",
 }
 
 def deduplicate_records(records: list[list[str]]) -> list[list[str]]:
