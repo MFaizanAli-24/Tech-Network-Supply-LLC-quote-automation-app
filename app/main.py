@@ -62,13 +62,14 @@ def send_quote_email(matches: list[dict[str, str]]) -> None:
     part_numbers = [match["part_number"] for match in matches]
     part_prices = [match["part_price"] for match in matches]
     part_conditions = [match["part_condition"] for match in matches]
+    part_manufacturers = [match["brand_name"] for match in matches]
     recipient_name = list(set([match["contact_name"] for match in matches]))[0]
     recipient_email = list(set([match["email_sent_to"] for match in matches]))[0]
     recipient_email_type = list(set([match["email_type"] for match in matches]))[0]
 
     subject = f"Quote for Part Number: {', '.join(part_numbers)}"
     body = get_quote_email_template(
-        part_names=part_numbers, part_prices=part_prices, part_conditions=part_conditions, to=recipient_name
+        part_names=part_numbers, part_prices=part_prices, part_conditions=part_conditions, part_manufacturers=part_manufacturers, to=recipient_name
     )
     send_email(to_address=recipient_email, subject=subject, body=body, body_type="HTML")
     logger.info(

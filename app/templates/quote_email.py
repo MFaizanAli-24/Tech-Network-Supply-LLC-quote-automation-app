@@ -1,4 +1,4 @@
-def get_quote_email_template(part_names: list[str], part_prices: list[str], part_conditions: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
+def get_quote_email_template(part_names: list[str], part_prices: list[str], part_conditions: list[str], part_manufacturers: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
     """
     Builds the HTML body for part(s) quote email.
 
@@ -6,6 +6,7 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
         part_names: A list of part names/numbers being quoted.
         part_prices: A list of the quoted prices, as displayed text.
         part_conditions: A list of the quoted part conditions, as displayed text.
+        part_manufacturers: A list of the quoted part manufacturers, as displayed text.
         to: Name of the contact the email is addressed to.
         from_company_name: Company name used in the closing signature.
 
@@ -14,7 +15,7 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
     """
 
     rows = ""
-    for part_name, part_price, part_condition in zip(part_names, part_prices, part_conditions):
+    for part_name, part_price, part_condition, part_manufacturer in zip(part_names, part_prices, part_conditions, part_manufacturers):
         if not part_name or not part_price:
             raise ValueError(f"Part name and price must be non-empty: {part_name}, {part_price}")
         try:
@@ -22,8 +23,9 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
             rows += f"""
                 <tr>
                     <td>{part_name}</td>
+                    <td>{part_manufacturer}</td>
                     <td>{part_price}</td>
-                    td>{part_condition}</td>
+                    <td>{part_condition}</td>
                 </tr>
             """
         except Exception as exc:
@@ -37,6 +39,7 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
                     <th>Part Name</th>
+                    <th>Manufacturer</th>
                     <th>Price</th>
                     <th>Condition</th>
                 </tr>
