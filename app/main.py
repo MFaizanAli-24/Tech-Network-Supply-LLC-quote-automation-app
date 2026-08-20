@@ -42,6 +42,8 @@ INTAKE_CONTACTS_SHEET_NAME = os.environ.get("GOOGLE_INTAKE_CONTACTS_SHEET_NAME")
 
 BROKER_BIN_REPORT_MINS = int(os.environ.get("BROKER_BIN_REPORT_MINS", "60"))
 
+PARTS_LOOKBACK_HOURS = int(os.environ.get("PARTS_LOOKBACK_HOURS", "24"))
+
 
 def send_quote_email(matches: list[dict[str, str]]) -> None:
     """
@@ -181,7 +183,7 @@ def main() -> None:
     logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
-    matches_filtered = filter_matches_already_sent_last_n_hours(matches, 24) 
+    matches_filtered = filter_matches_already_sent_last_n_hours(matches, PARTS_LOOKBACK_HOURS) 
     aggregated_matches_by_email = aggregate_matches_by_email(matches_filtered)
     aggregated_matches_by_company = aggregate_matches_by_company(matches_filtered)
     
