@@ -62,9 +62,12 @@ def save_part_request(
     return response.data
 
 
-def get_last_24_hours_parts_requests() -> list[dict]:
+def get_last_n_hours_parts_requests(n_hours:int=24) -> list[dict]:
     """
-    Fetches all part requests recorded in the last 24 hours, most recent first.
+    Fetches all part requests recorded in the last n hours, most recent first.
+
+    Args:
+        n_hours: The number of hours to look back for part requests.
 
     Returns:
         A list of parts_requests rows.
@@ -72,7 +75,7 @@ def get_last_24_hours_parts_requests() -> list[dict]:
     Raises:
         RuntimeError: If the query fails (e.g. missing table, bad credentials).
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=n_hours)
 
     try:
         response = (

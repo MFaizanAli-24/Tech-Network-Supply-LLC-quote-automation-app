@@ -87,7 +87,7 @@ app/
 │       └── intake_service.py                # syncs new parts/contacts into the intake sheets
 ├── repository/
 │   ├── supabase_client.py                   # shared Supabase client
-│   ├── parts_repository.py                  # save_part_request, get_last_24_hours_parts_requests
+│   ├── parts_repository.py                  # save_part_request, get_last_n_hours_parts_requests
 │   └── tables/sql/parts_requests.sql        # parts_requests table schema
 └── templates/
     └── quote_email.py                       # HTML bodies for quote + reconciliation emails

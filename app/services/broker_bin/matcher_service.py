@@ -4,7 +4,7 @@ resolving which contact email (primary or secondary) each quote should go to.
 """
 
 import logging
-from repository.parts_repository import get_last_24_hours_parts_requests
+from repository.parts_repository import get_last_n_hours_parts_requests
 
 logger = logging.getLogger(__name__)
 
@@ -204,28 +204,29 @@ def aggregate_matches_by_company(matches: list[dict[str, str]]) -> dict[str, lis
     return aggregated
 
 
-def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> list[dict[str, str]]:
+def filter_matches_already_sent_last_n_hours(matches: list[dict[str, str]], n_hours: int = 24) -> list[dict[str, str]]:
     """
-    Filters out matches that have already been sent in the last 24 hours.
+    Filters out matches that have already been sent in the last n hours.
 
     Args:
         matches: List of match dicts as produced by `match_broker_bin_records`.
+        n_hours: The number of hours to look back for already-sent matches.
     Returns:
-        A filtered list of match dicts that have not been sent in the last 24 hours
+        A filtered list of match dicts that have not been sent in the last n hours
     """
 
     try:
-        parts_requests_last_24_hours = get_last_24_hours_parts_requests()
+        parts_requests_last_n_hours = get_last_n_hours_parts_requests(n_hours)
     except RuntimeError as exc:
-        logger.error("Failed to fetch last 24 hours parts requests: %s", exc)
-        return matches  # If we can't fetch the last 24 hours, assume all matches are new
+        logger.error("Failed to fetch last %d hours parts requests: %s", n_hours, exc)
+        return matches  # If we can't fetch the last n hours, assume all matches are new
 
     filtered_matches = []
-    if parts_requests_last_24_hours:
-        logger.info("Fetched %d parts requests from the last 24 hours", len(parts_requests_last_24_hours))
+    if parts_requests_last_n_hours:
+        logger.info("Fetched %d parts requests from the last %d hours", len(parts_requests_last_n_hours), n_hours)
         for match in matches:
             match_found = False
-            for part_request in parts_requests_last_24_hours:
+            for part_request in parts_requests_last_n_hours:
                 part_number_sent = part_request.get("part_number")
                 part_brand_sent = part_request.get("brand_name")
                 part_company_sent = part_request.get("company_name")
@@ -239,20 +240,20 @@ def filter_matches_already_sent_last_24_hours(matches: list[dict[str, str]]) -> 
                         match["contact_name"] == part_contact_sent and
                         match["email_sent_to"] == part_email_sent):
                         logger.info(
-                            "Match for part %s / %s / %s already sent to %s in the last 24 hours; skipping",
-                            part_number_sent, part_company_sent, part_contact_sent, part_email_sent
+                            "Match for part %s / %s / %s already sent to %s in the last %d hours; skipping",
+                            part_number_sent, part_company_sent, part_contact_sent, part_email_sent, n_hours
                         )
                         match_found = True
                         break
-                    
-            if not match_found:        
+
+            if not match_found:
                 filtered_matches.append(match)
     else:
-        logger.info("No parts requests found in the last 24 hours; all matches are new")
+        logger.info("No parts requests found in the last %d hours; all matches are new", n_hours)
         filtered_matches = matches
-        
+
     logger.info(
-        "Filtered out %d matches already sent in the last 24 hours; %d remaining",
-        len(matches) - len(filtered_matches), len(filtered_matches)
+        "Filtered out %d matches already sent in the last %d hours; %d remaining",
+        len(matches) - len(filtered_matches), n_hours, len(filtered_matches)
     )
     return filtered_matches

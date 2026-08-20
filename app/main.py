@@ -10,7 +10,7 @@ load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 from integrations.google.gsheets import get_sheet_values
 from integrations.outlook.mail import get_emails_from_sender, send_email
 from services.broker_bin.parser_service import parse_brokerbin_report
-from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_24_hours, aggregate_matches_by_company
+from services.broker_bin.matcher_service import match_broker_bin_records, aggregate_matches_by_email, filter_matches_already_sent_last_n_hours, aggregate_matches_by_company
 from services.broker_bin.intake_service import update_intake_parts_sheet, update_intake_contacts_sheet
 from templates.quote_email import get_reconciltion_report_template, get_quote_email_template
 from repository.parts_repository import save_part_request
@@ -181,7 +181,7 @@ def main() -> None:
     logger.info("==================== MATCH LOGS ====================")
 
     matches = match_broker_bin_records(broker_bin_records, parts_records, contacts_records)
-    matches_filtered = filter_matches_already_sent_last_24_hours(matches) 
+    matches_filtered = filter_matches_already_sent_last_n_hours(matches, 24) 
     aggregated_matches_by_email = aggregate_matches_by_email(matches_filtered)
     aggregated_matches_by_company = aggregate_matches_by_company(matches_filtered)
     
