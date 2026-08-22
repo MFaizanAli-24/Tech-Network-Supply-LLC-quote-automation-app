@@ -1,4 +1,4 @@
-def get_quote_email_template(part_names: list[str], part_prices: list[str], part_conditions: list[str], part_manufacturers: list[str], to: str, from_company_name: str = "Black Merlin LLC") -> str:
+def get_quote_email_template(part_names: list[str], part_prices: list[str], part_conditions: list[str], part_manufacturers: list[str], to: str, sender_name: str= "James Taylor", from_company_name: str = "Black Marlin LLC") -> str:
     """
     Builds the HTML body for part(s) quote email.
 
@@ -30,11 +30,16 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
             """
         except Exception as exc:
             raise ValueError(f"Failed to format part name and price into HTML: {part_name}, {part_price}") from exc
+
+    if to and ("N/A" not in to):
+        intial_greeting = f"Hi {to},"
+    else:
+        intial_greeting = "Hi,"
         
     return f"""
     <html>
         <body>
-            <p>Hi {to},</p>
+            <p>{intial_greeting}</p>
             <p>We currently have competitive pricing on the following part(s)</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
@@ -45,8 +50,10 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
                 </tr>
                 {rows}
             </table>
-            <p>If you are interested in any of these items or have additional requirements, simply reply with your part numbers, and we will be happy to provide our best pricing</p>
-            <p>Best regards,<br>{from_company_name}</p>
+            <p>If you are interested in any of these items or have additional requirements, simply reply with your part numbers, and we will be happy to provide our best pricing.Net payment terms are available for eligible customers, subject to credit approval.</p>
+            <p>Best regards,</p>
+            <p>{sender_name}<br>{from_company_name}</p>
+            
         </body>
     </html>
     """
