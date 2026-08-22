@@ -69,7 +69,8 @@ def get_non_duplicate_intake_parts_rows(
     indices_parts = get_header_indices(headers_parts, required_headers=REQUIRED_HEADERS)
     existing_parts_rows_broken_bin_eq = [
         [row[indices_parts["part_number"]], row[indices_parts["brand_name"]]]
-        for row in existing_parts_rows
+        for row in existing_parts_rows 
+        if len(row) > max(indices_parts["part_number"], indices_parts["brand_name"]) # Ensure row has enough columns to access the required indices
     ]
 
     dedup_existing_parts_rows_broken_bin_eq = deduplicate_records(existing_parts_rows_broken_bin_eq)
@@ -121,6 +122,7 @@ def get_non_duplicate_intake_contacts_rows(
     existing_contacts_rows_broken_bin_eq = [
         [row[indices_contacts["company_name"]], row[indices_contacts["contact_name"]]]
         for row in existing_contacts_rows
+        if len(row) > max(indices_contacts["company_name"], indices_contacts["contact_name"]) # Ensure row has enough columns to access the required indices
     ]
 
     dedup_existing_contacts_rows_broken_bin_eq = deduplicate_records(existing_contacts_rows_broken_bin_eq)
