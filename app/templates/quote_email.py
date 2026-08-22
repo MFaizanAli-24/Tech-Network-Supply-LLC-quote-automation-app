@@ -40,7 +40,7 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
     <html>
         <body>
             <p>{intial_greeting}</p>
-            <p>We currently have competitive pricing on the following part(s)</p>
+            <p>We currently have competitive pricing on the following part(s):</p>
             <table border="1" cellpadding="5" cellspacing="0">
                 <tr>
                     <th>Part Name</th>
@@ -50,7 +50,8 @@ def get_quote_email_template(part_names: list[str], part_prices: list[str], part
                 </tr>
                 {rows}
             </table>
-            <p>If you are interested in any of these items or have additional requirements, simply reply with your part numbers, and we will be happy to provide our best pricing.Net payment terms are available for eligible customers, subject to credit approval.</p>
+            <p>If you are interested in any of these items or have additional requirements, simply reply with your part numbers, and we will be happy to provide our best pricing.</p>
+            <p>Net payment terms are available for eligible customers, subject to credit approval.</p>
             <p>Best regards,</p>
             <p>{sender_name}<br>{from_company_name}</p>
             
